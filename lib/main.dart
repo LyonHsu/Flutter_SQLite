@@ -67,14 +67,8 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState(){
     // TODO: implement initState
     super.initState();
-    lyonDataBase.init().then((value) {
-        getData().then((value) {
-          setState(() {
-            this.dogs=value;
-          });
-        });
-    });
-
+    lyonDataBase = new LyonDataBase();
+    lyonDataBase.init();
   }
 
 
@@ -119,9 +113,13 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             SingleChildScrollView(
               scrollDirection : Axis.vertical,
-              child:  Text(
-                '${dogs}',
-                style: Theme.of(context).textTheme.headline6,
+              child:  StreamBuilder<String>(  // 监听Stream，每次值改变的时候，更新Text中的内容
+                  stream: lyonDataBase.outCounter,
+                  initialData: dogs,
+                  builder: (BuildContext context, AsyncSnapshot<String> snapshot){
+                    return Text('${snapshot.data}',style: Theme.of(context).textTheme.headline6,
+                    );
+                  }
               ),
             )
 
@@ -137,13 +135,14 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _addDog() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => AddDogActivity(lyonDataBase:lyonDataBase))).then((value) {
-      getData().then((value) {
-        setState(() {
-          this.dogs=value;
-        });
-      });
-    });
+    Navigator.push(context, MaterialPageRoute(builder: (context) => AddDogActivity(lyonDataBase:lyonDataBase)));
+//        .then((value) {
+//      getData().then((value) {
+//        setState(() {
+//          this.dogs=value;
+//        });
+//      });
+//    });
 
   }
 

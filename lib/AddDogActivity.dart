@@ -36,11 +36,6 @@ class _AddDogFragment extends State<AddDogFragment> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    getData().then((value) {
-      setState(() {
-        this.dogs=value;
-      });
-    });
   }
   @override
   Widget build(BuildContext context) {
@@ -52,13 +47,16 @@ class _AddDogFragment extends State<AddDogFragment> {
       SingleChildScrollView(
           child: Column(
               children: <Widget>[
-                SingleChildScrollView(
-                  scrollDirection : Axis.vertical,
-                  child:  Text(
-                    '${dogs}',
-                    style: Theme.of(context).textTheme.headline6,
+
+                  StreamBuilder<String>(  // 监听Stream，每次值改变的时候，更新Text中的内容
+                      stream: lyonDataBase.outCounter,
+                      initialData: dogs,
+                      builder: (BuildContext context, AsyncSnapshot<String> snapshot){
+                        return Text('${snapshot.data}',style: Theme.of(context).textTheme.headline6,
+                        );
+                      }
                   ),
-                )
+
               ]
           )
 
@@ -77,31 +75,22 @@ class _AddDogFragment extends State<AddDogFragment> {
   }
 
   void _addDogOK() async{
-
-    setState(() {
       dogAges++;
       dogId++;
       print('dogId : $dogId ,dogAges : $dogAges,');
-    });
     var fido = Dog(
       id: dogId,
       name: 'Fido',
       age: dogAges,
     );
     await lyonDataBase.insertDog(fido);
-    getData().then((value) {
-      setState(() {
-        this.dogs=value;
-      });
-    });
+
   }
 
   Future<String> getData() async{
     List<Dog> dogs =(await lyonDataBase.dogs()) ;
-    setState(() {
       dogAges = dogs.last.age;
       dogId = dogs.last.id;
-    });
     print('dogId : $dogId ,dogAges : $dogAges, AddDogActivity $dogs');
     return dogs.toString();
   }
